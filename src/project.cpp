@@ -92,29 +92,29 @@ bool ScoreList::isValidScore(double score) {
 // Student
 // ===============================
 
-Student::Student() {
-    id = "";
-    name = "";
+Player::Player() {
+    riotId = "";
+    agent = "";
+}
+ 
+Player::Player(string playerRiotId, string mainAgent) {
+    riotId = playerRiotId;
+    agent = mainAgent;
 }
 
-Student::Student(string studentId, string studentName) {
-    id = studentId;
-    name = studentName;
+string Player::getRiotId() const {
+    return riotId;
 }
-
-string Student::getId() const {
-    return id;
+ 
+string Player::getAgent() const {
+    return agent;
 }
-
-string Student::getName() const {
-    return name;
-}
-
-ScoreList& Student::getScoreList() {
+ 
+ScoreList& Player::getScoreList() {
     return scoreList;
 }
-
-const ScoreList& Student::getScoreList() const {
+ 
+const ScoreList& Player::getScoreList() const {
     return scoreList;
 }
 

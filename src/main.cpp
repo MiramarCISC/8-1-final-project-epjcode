@@ -1,83 +1,97 @@
 #include "project.hpp"
 #include <iostream>
+#include <iomanip>
+#include <limits>
 
 using namespace std;
 
 int main() {
     int choice = -1;
 
-    cout << "CISC 192 Final Project Sample" << endl;
-    cout << "Sample code is provided only as an example." << endl;
-    cout << "Delete or replace the sample code before final submission." << endl;
+    cout << "Valorant Scoreboard Tracker" << endl;
+    cout << "Tracks players, combat scores, ranks, and achievements." << endl;
 
     do {
         printMenu();
-        cin >> choice;
+        choice = readMenuChoice();
 
-        while (!isValidMenuChoice(choice)) {
-            cout << "Invalid choice. Enter 0-4: ";
-            cin >> choice;
-        }
-
+      
         switch (choice) {
             case 1: {
-                Student student("A123", "Alex");
-                student.getScoreList().addScore(90.0);
-                student.getScoreList().addScore(80.0);
-                student.getScoreList().addScore(100.0);
-                student.getScoreList().sortAscending();
+                Player player("Reyna#KR1", "Reyna");
+                player.getScoreList().addScore(298.5);
+                player.getScoreList().addScore(341.0);
+                player.getScoreList().addScore(355.0);
+                player.getScoreList().sortDescending();
 
-                printStudent(student);
-                cout << "Score 100 found at index "
-                     << student.getScoreList().findScore(100.0)
+                printplayer(Player));
+                cout << "Score 341 found at index "
+                     << student.getScoreList().findScore(341.0)
                      << endl;
 
                 break;
             }
 
             case 2: {
-                TaskList tasks;
-                tasks.insertFront(Task("study", 5));
-                tasks.insertFront(Task("project", 4));
-                tasks.markTaskComplete("study");
-
-                cout << "Task count: " << tasks.countTasks() << endl;
-                cout << "Removed completed tasks: "
-                     << tasks.removeCompletedTasks()
+                AchievementLIst achievements;
+                achievements.insertFront(Achievement("Ace", 5));
+                achievements.insertFront(Achievement("1v4 clutch", 4));
+                achievements.markAchievementDisputed("1v4 clutch");
+                
+                cout << "Achievement count: "
+                     << achievements.countAchievements() << endl;
+                cout << "Removed deleted achievements: "
+                     << achievements.removeDeletedAchievements()
                      << endl;
-                cout << "Remaining task count: " << tasks.countTasks() << endl;
+                cout << "Remaining achievement count: "
+                     << achievements.countAchievements() << endl;
 
                 break;
             }
 
             case 3: {
-                InventoryItem items[MAX_INVENTORY_ITEMS];
-                int count = InventoryReport::readInventoryFile(
-                    "data/inventory.txt",
-                    items,
-                    MAX_INVENTORY_ITEMS
+                RosterEntry entries[MAX_ROSTER_ENTRIES];
+                int count = RosterReport::readRosterFile(
+                    "data/roster.txt",
+                    entries,
+                    MAX_ROSTER_ENTRIES
                 );
 
-                cout << "Read " << count << " inventory item(s)." << endl;
-                cout << "Total inventory value: "
-                     << InventoryReport::calculateTotalInventoryValue(items, count)
+                cout << fixed << setprecision(1);
+                cout << "Read " << count << " roster entr(ies)." << endl;
+                cout << "Team average combat score: "
+                     << RosterReport::calculateTeamAverage(entries, count)
                      << endl;
+                int top = RosterReport::findTopFraggerIndex(entries, count);
 
-                if (InventoryReport::writeInventoryReport(
-                        "inventory_report.txt",
-                        items,
-                        count
-                    )) {
-                    cout << "Report written to inventory_report.txt" << endl;
+                if (top != -1) {
+                    cout << "Top fragger: " << entries[top].riotId << " ("
+                         << RosterReport::calculateAverageScore(entries[top])
+                         << ", "
+                         << Player::determineRank(
+                                RosterReport::calculateAverageScore(entries[top]))
+                         << ")" << endl;
                 }
 
+                if (RosterReport::writeRosterReport(
+                        "roster_report.txt",
+                        entries,
+                        count
+                    )) {
+                    cout << "Report written to roster_report.txt" << endl;
+                }
+ 
                 break;
             }
 
             case 4:
-                cout << "Use this sample only as an example. "
-                     << "Delete or replace sample code before submission."
-                     << endl;
+                cout << fixed << setprecision(0);
+                cout << "Rank is set by average combat score:" << endl;
+                cout << "  Radiant  " << RADIANT_MINIMUM << " and above" << endl;
+                cout << "  Immortal " << IMMORTAL_MINIMUM << " to " << RADIANT_MINIMUM - 1 << endl;
+                cout << "  Diamond  " << DIAMOND_MINIMUM << " to " << IMMORTAL_MINIMUM - 1 << endl;
+                cout << "  Gold     " << GOLD_MINIMUM << " to " << DIAMOND_MINIMUM - 1 << endl;
+                cout << "  Iron     below " << GOLD_MINIMUM << endl;
                 break;
 
             case 0:

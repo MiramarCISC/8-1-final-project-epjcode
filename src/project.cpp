@@ -5,9 +5,48 @@
 
 using namespace std;
 
-// ===============================
-// ScoreList
-// ===============================
+bool isValidMenuChoice(int choice) {
+    return choice >= 0 && choice <= 4;
+}
+
+ 
+void printMenu() {
+    cout << endl;
+    cout << "Valorant Scoreboard Tracker" << endl;
+    cout << "1. Show a player's scores and rank" << endl;
+    cout << "2. Show, add, or delete a notable achievement" << endl;
+    cout << "3. Read the roster file and write a report" << endl;
+    cout << "4. Show the rank scale" << endl;
+    cout << "0. Exit" << endl;
+    cout << "Choice: ";
+}
+ 
+void printPlayer(const Player& player) {
+    cout << fixed << setprecision(1);
+    cout << player.getRiotId() << " "
+         << player.getAgent() << " "
+         << "Average: " << player.getAverage() << " "
+         << "Rank: " << player.getRank()
+         << endl;
+}
+
+int readMenuChoice() {
+    int choice = 0;
+    while(true){
+        if (cin >> choice && isValidMenuChoice(choice)) {
+            return choice;
+        }
+ 
+        if (cin.eof()) {
+            return 0;
+        }
+ 
+        cout << "Invalid choice.\n";
+        cin.clear();
+        cin.ignore(10000, '\n');
+
+    }
+}
 
 ScoreList::ScoreList() {
     count = 0;
@@ -18,7 +57,7 @@ ScoreList::ScoreList() {
 }
 
 bool ScoreList::addScore(double score) {
-    if (!isValidScore(score) || count >= 10) {
+    if (!isValidScore(score) || count >= MAX_SCORES) {
         return false;
     }
 
@@ -68,29 +107,25 @@ int ScoreList::findScore(double target) const {
     return -1;
 }
 
-void ScoreList::sortAscending() {
+void ScoreList::sortDescending() {
     for (int start = 0; start < count - 1; start++) {
-        int minIndex = start;
+        int maxIndex = start;
 
         for (int i = start + 1; i < count; i++) {
-            if (scores[i] < scores[minIndex]) {
-                minIndex = i;
+            if (scores[i] > scores[maxIndex]) {
+                maxIndex = i;
             }
         }
 
         double temp = scores[start];
-        scores[start] = scores[minIndex];
-        scores[minIndex] = temp;
+        scores[start] = scores[maxIndex];
+        scores[maxIndex] = temp;
     }
 }
 
 bool ScoreList::isValidScore(double score) {
-    return score >= 0.0 && score <= 100.0;
+    return score >= 0.0 && score <= MAX_SCORE;
 }
-
-// ===============================
-// Student
-// ===============================
 
 Player::Player() {
     riotId = "";
@@ -118,328 +153,322 @@ const ScoreList& Player::getScoreList() const {
     return scoreList;
 }
 
-double Student::getAverage() const {
+double Player::getAverage() const {
     return scoreList.getAverage();
 }
-
-char Student::getLetterGrade() const {
-    return determineLetterGrade(getAverage());
+ 
+string Player::getRank() const {
+    return determineRank(getAverage());
+}
+ 
+bool Player::isValidRiotId(string riotId) {
+    size_t hash = riotId.find('#');
+ 
+    return hash != string::npos && hash > 0 && hash < riotId.length() - 1 &&
+           riotId.find(' ') == string::npos;
 }
 
-bool Student::isValidId(string id) {
-    return id.length() >= 3 && id[0] >= 'A' && id[0] <= 'Z';
-}
-
-char Student::determineLetterGrade(double average) {
-    if (average >= A_MINIMUM) {
-        return 'A';
-    } else if (average >= B_MINIMUM) {
-        return 'B';
-    } else if (average >= C_MINIMUM) {
-        return 'C';
-    } else if (average >= D_MINIMUM) {
-        return 'D';
+string Player::determineRank(double average) {
+    if (average >= RADIANT_MINIMUM) {
+        return "Radiant";
+    } else if (average >= IMMORTAL_MINIMUM) {
+        return "Immortal";
+    } else if (average >= DIAMOND_MINIMUM) {
+        return "Diamond";
+    } else if (average >= GOLD_MINIMUM) {
+        return "Gold";
     } else {
-        return 'F';
+        return "Iron";
     }
 }
 
-// ===============================
-// Task and TaskList
-// ===============================
-
-Task::Task() {
-    description = "";
-    priority = 1;
-    completed = false;
+Achievement::Achievement() {
+    label = "";
+    tier = MIN_TIER;
+    disputed = false;
 }
-
-Task::Task(string taskDescription, int taskPriority) {
-    description = taskDescription;
-
-    if (isValidPriority(taskPriority)) {
-        priority = taskPriority;
+ 
+Achievement::Achievement(string achievementLabel, int achievementTier) {
+    label = achievementLabel;
+ 
+    if (isValidTier(achievementTier)) {
+        tier = achievementTier;
     } else {
-        priority = 1;
+        tier = MIN_TIER;
     }
-
-    completed = false;
+ 
+    disputed = false;
 }
-
-string Task::getDescription() const {
-    return description;
+ 
+string Achievement::getLabel() const {
+    return label;
 }
-
-int Task::getPriority() const {
-    return priority;
+ 
+int Achievement::getTier() const {
+    return tier;
 }
-
-bool Task::isCompleted() const {
-    return completed;
+ 
+bool Achievement::isDisputed() const {
+    return disputed;
 }
-
-void Task::markComplete() {
-    completed = true;
+ 
+void Achievement::markDisputed() {
+    disputed = true;
 }
-
-bool Task::isValidPriority(int priority) {
-    return priority >= 1 && priority <= 5;
+ 
+bool Achievement::isValidTier(int tier) {
+    return tier >= MIN_TIER && tier <= MAX_TIER;
 }
-
-TaskNode::TaskNode(Task task) {
-    data = task;
+ 
+AchievementNode::AchievementNode(Achievement achievement) {
+    data = achievement;
     next = nullptr;
 }
-
-TaskList::TaskList() {
+ 
+AchievementList::AchievementList() {
     head = nullptr;
 }
-
-TaskList::~TaskList() {
+ 
+AchievementList::~AchievementList() {
     clear();
 }
 
-void TaskList::insertFront(Task task) {
-    TaskNode* newNode = new TaskNode(task);
-    newNode->next = head;
-    head = newNode;
-}
-
-int TaskList::countTasks() const {
+ 
+int AchievementList::countAchievements() const {
     int count = 0;
-    const TaskNode* current = head;
-
+    const AchievementNode* current = head;
+ 
     while (current != nullptr) {
         count++;
         current = current->next;
     }
-
+ 
     return count;
 }
-
-TaskNode* TaskList::findTask(string description) {
-    TaskNode* current = head;
-
+ 
+AchievementNode* AchievementList::findAchievement(string label) {
+    AchievementNode* current = head;
+ 
     while (current != nullptr) {
-        if (current->data.getDescription() == description) {
+        if (current->data.getLabel() == label) {
             return current;
         }
-
+ 
         current = current->next;
     }
-
+ 
     return nullptr;
 }
-
-const TaskNode* TaskList::findTask(string description) const {
-    const TaskNode* current = head;
-
+ 
+const AchievementNode* AchievementList::findAchievement(string label) const {
+    const AchievementNode* current = head;
+ 
     while (current != nullptr) {
-        if (current->data.getDescription() == description) {
+        if (current->data.getLabel() == label) {
             return current;
         }
-
+ 
         current = current->next;
     }
-
+ 
     return nullptr;
 }
-
-bool TaskList::markTaskComplete(string description) {
-    TaskNode* found = findTask(description);
-
-    if (found == nullptr) {
-        return false;
-    }
-
-    found->data.markComplete();
-    return true;
-}
-
-int TaskList::removeCompletedTasks() {
-    int removed = 0;
-
-    while (head != nullptr && head->data.isCompleted()) {
-        TaskNode* nodeToRemove = head;
-        head = head->next;
-        delete nodeToRemove;
-        removed++;
-    }
-
-    TaskNode* current = head;
-
-    while (current != nullptr && current->next != nullptr) {
-        if (current->next->data.isCompleted()) {
-            TaskNode* nodeToRemove = current->next;
-            current->next = nodeToRemove->next;
-            delete nodeToRemove;
-            removed++;
-        } else {
-            current = current->next;
-        }
-    }
-
-    return removed;
-}
-
-void TaskList::clear() {
-    TaskNode* current = head;
-
+ 
+void AchievementList::clear() {
+    AchievementNode* current = head;
+ 
     while (current != nullptr) {
-        TaskNode* nextNode = current->next;
+        AchievementNode* nextNode = current->next;
         delete current;
         current = nextNode;
     }
-
+ 
     head = nullptr;
 }
-
-bool TaskList::isEmpty() const {
+ 
+bool AchievementList::isEmpty() const {
     return head == nullptr;
 }
-
 // ===============================
 // InventoryReport
 // ===============================
 
-bool InventoryReport::isValidQuantity(int quantity) {
-    return quantity >= 0;
+bool RosterReport::isValidMatchCount(int matchesPlayed) {
+    return matchesPlayed >= 0;
 }
-
-bool InventoryReport::isValidPrice(double price) {
-    return price >= 0.0;
+ 
+bool RosterReport::isValidTotalScore(double totalCombatScore) {
+    return totalCombatScore >= 0.0;
 }
-
-double InventoryReport::calculateItemValue(const InventoryItem& item) {
-    if (!isValidQuantity(item.quantity) || !isValidPrice(item.price)) {
+ 
+double RosterReport::calculateAverageScore(const RosterEntry& entry) {
+    if (!isValidMatchCount(entry.matchesPlayed) ||
+        !isValidTotalScore(entry.totalCombatScore) ||
+        entry.matchesPlayed == 0) {
         return 0.0;
     }
-
-    return item.quantity * item.price;
+ 
+    return entry.totalCombatScore / entry.matchesPlayed;
 }
-
-int InventoryReport::readInventoryFile(string filename, InventoryItem items[], int maxItems) {
-    if (items == nullptr || maxItems <= 0) {
+ 
+int RosterReport::readRosterFile(string filename, RosterEntry entries[], int maxEntries) {
+    if (entries == nullptr || maxEntries <= 0) {
         return 0;
     }
-
+ 
     ifstream in(filename);
-
+ 
     if (!in.is_open()) {
         return 0;
     }
-
+ 
     int count = 0;
-    InventoryItem item;
-
-    while (count < maxItems &&
-           in >> item.sku >> item.name >> item.quantity >> item.price) {
-        if (isValidQuantity(item.quantity) && isValidPrice(item.price)) {
-            items[count] = item;
+    RosterEntry entry;
+ 
+    while (count < maxEntries &&
+           in >> entry.riotId >> entry.agent >> entry.matchesPlayed
+              >> entry.totalCombatScore) {
+        if (Player::isValidRiotId(entry.riotId) &&
+            isValidMatchCount(entry.matchesPlayed) &&
+            isValidTotalScore(entry.totalCombatScore)) {
+            entries[count] = entry;
             count++;
         }
     }
-
+ 
     return count;
 }
-
-bool InventoryReport::writeInventoryReport(string filename, const InventoryItem items[], int count) {
-    if (items == nullptr || count < 0) {
+ 
+bool RosterReport::writeRosterReport(string filename, const RosterEntry entries[], int count) {
+    if (entries == nullptr || count < 0) {
         return false;
     }
-
+ 
     ofstream out(filename);
-
+ 
     if (!out.is_open()) {
         return false;
     }
-
-    out << fixed << setprecision(2);
-    out << "Inventory Report" << endl;
-    out << "SKU Name Quantity Price Value" << endl;
-
+ 
+    out << fixed << setprecision(1);
+    out << "Valorant Scoreboard Report" << endl;
+    out << "RiotID Agent Matches Total Average Rank" << endl;
+ 
     for (int i = 0; i < count; i++) {
-        out << items[i].sku << " "
-            << items[i].name << " "
-            << items[i].quantity << " "
-            << items[i].price << " "
-            << calculateItemValue(items[i]) << endl;
+        out << entries[i].riotId << " "
+            << entries[i].agent << " "
+            << entries[i].matchesPlayed << " "
+            << entries[i].totalCombatScore << " "
+            << calculateAverageScore(entries[i]) << " "
+            << Player::determineRank(calculateAverageScore(entries[i])) << endl;
+    }
+ 
+    out << "Team average combat score: "
+        << calculateTeamAverage(entries, count)
+        << endl;
+ 
+    return true;
+}
+ 
+double RosterReport::calculateTeamAverage(const RosterEntry entries[], int count) {
+    if (entries == nullptr || count <= 0) {
+        return 0.0;
+    }
+ 
+    double total = 0.0;
+ 
+    for (int i = 0; i < count; i++) {
+        total += calculateAverageScore(entries[i]);
+    }
+ 
+    return total / count;
+}
+ 
+int RosterReport::findEntryByRiotId(const RosterEntry entries[], int count, string riotId) {
+    if (entries == nullptr || count <= 0) {
+        return -1;
+    }
+ 
+    for (int i = 0; i < count; i++) {
+        if (entries[i].riotId == riotId) {
+            return i;
+        }
+    }
+ 
+    return -1;
+}
+ 
+int RosterReport::findTopFraggerIndex(const RosterEntry entries[], int count) {
+    if (entries == nullptr || count <= 0) {
+        return -1;
+    }
+ 
+    int topIndex = 0;
+ 
+    for (int i = 1; i < count; i++) {
+        if (calculateAverageScore(entries[i]) > calculateAverageScore(entries[topIndex])) {
+            topIndex = i;
+        }
+    }
+ 
+    return topIndex;
+}
+
+bool AchievementList::insertByTier(Achievement achievement) {
+    if (achievement.getLabel().length() == 0 ||
+        findAchievement(achievement.getLabel()) != nullptr) {
+        return false;
     }
 
-    out << "Total inventory value: "
-        << calculateTotalInventoryValue(items, count)
-        << endl;
+    AchievementNode* newNode = new AchievementNode(achievement);
+
+    if (head == nullptr || achievement.getTier() > head->data.getTier()) {
+        newNode->next = head;
+        head = newNode;
+        return true;
+    }
+
+    AchievementNode* current = head;
+
+    while (current->next != nullptr &&
+           current->next->data.getTier() >= achievement.getTier()) {
+        current = current->next;
+    }
+
+    newNode->next = current->next;
+    current->next = newNode;
 
     return true;
 }
 
-double InventoryReport::calculateTotalInventoryValue(const InventoryItem items[], int count) {
-    if (items == nullptr || count <= 0) {
-        return 0.0;
+bool AchievementList::removeAchievement(string label) {
+    if (head == nullptr) {
+        return false;
     }
 
-    double total = 0.0;
-
-    for (int i = 0; i < count; i++) {
-        total += calculateItemValue(items[i]);
+    if (head->data.getLabel() == label) {
+        AchievementNode* nodeToRemove = head;
+        head = head->next;
+        delete nodeToRemove;
+        return true;
     }
 
-    return total;
-}
+    AchievementNode* current = head;
 
-int InventoryReport::findItemBySku(const InventoryItem items[], int count, string sku) {
-    if (items == nullptr || count <= 0) {
-        return -1;
-    }
-
-    for (int i = 0; i < count; i++) {
-        if (items[i].sku == sku) {
-            return i;
+    while (current->next != nullptr) {
+        if (current->next->data.getLabel() == label) {
+            AchievementNode* nodeToRemove = current->next;
+            current->next = nodeToRemove->next;
+            delete nodeToRemove;
+            return true;
         }
+
+        current = current->next;
     }
 
-    return -1;
+    return false;
 }
 
-int InventoryReport::findHighestValueItemIndex(const InventoryItem items[], int count) {
-    if (items == nullptr || count <= 0) {
-        return -1;
-    }
-
-    int highestIndex = 0;
-
-    for (int i = 1; i < count; i++) {
-        if (calculateItemValue(items[i]) > calculateItemValue(items[highestIndex])) {
-            highestIndex = i;
-        }
-    }
-
-    return highestIndex;
-}
-
-// ===============================
-// Menu helpers
-// ===============================
-
-bool isValidMenuChoice(int choice) {
-    return choice >= 0 && choice <= 4;
-}
-
-void printMenu() {
-    cout << endl;
-    cout << "Final Project Sample Menu" << endl;
-    cout << "1. Demonstrate student scores" << endl;
-    cout << "2. Demonstrate linked task list" << endl;
-    cout << "3. Demonstrate inventory report" << endl;
-    cout << "4. Show instructions" << endl;
-    cout << "0. Exit" << endl;
-    cout << "Choice: ";
-}
-
-void printStudent(const Student& student) {
-    cout << student.getId() << " "
-         << student.getName() << " "
-         << "Average: " << student.getAverage() << " "
-         << "Grade: " << student.getLetterGrade()
-         << endl;
+const AchievementNode* AchievementList::getHead() const {
+    return head;
 }

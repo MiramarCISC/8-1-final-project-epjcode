@@ -1,0 +1,6 @@
+Valorant Scoreboard Report
+RiotID Agent Matches Total Average Rank
+Ned#KR1 Reyna 3 900.0 300.0 Radiant
+Peter#EUW Sova 4 800.0 200.0 Gold
+MJ#BR1 Sage 2 300.0 150.0 Iron
+Team average combat score: 216.7

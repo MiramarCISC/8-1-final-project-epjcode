@@ -1,0 +1,5 @@
+Ned#Stark Reyna 3 994.5
+Arya#Stark Jett 3 780.0
+Robert#Baratheon Chamber 5 939.1
+Tyrion#Lannister Deadlock 9 293.9
+Daenerys#Targaryen Skye 1 340.2

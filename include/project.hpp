@@ -3,127 +3,120 @@
 
 #include <string>
 
-const double A_MINIMUM = 90.0;
-const double B_MINIMUM = 80.0;
-const double C_MINIMUM = 70.0;
-const double D_MINIMUM = 60.0;
-const int MAX_INVENTORY_ITEMS = 100;
+using namespace std;
 
-// SAMPLE CODE ONLY:
-// These classes demonstrate course concepts using sample project nouns.
-// Delete or replace these sample classes before final submission.
+const int MAX_SCORES = 10;
+const int MAX_ROSTER_ENTRIES = 20;
+
+const double MIN_SCORE = 0.0;
+const double MAX_SCORE = 1000.0;
+
+const double RADIANT_MINIMUM = 300.0;
+const double IMMORTAL_MINIMUM = 260.0;
+const double DIAMOND_MINIMUM = 220.0;
+const double GOLD_MINIMUM = 180.0;
+
+const int MIN_TIER = 1;
+const int MAX_TIER = 5;
+
+struct RosterEntry {
+    string riotId;
+    string agent;
+    int matchesPlayed;
+    double totalCombatScore;
+};
 
 class ScoreList {
 private:
-    double scores[10];
+    double scores[MAX_SCORES];
     int count;
 
 public:
     ScoreList();
-
     bool addScore(double score);
     int getCount() const;
     double getScoreAt(int index) const;
-
     double getTotal() const;
     double getAverage() const;
     int findScore(double target) const;
-    void sortAscending();
-
+    void sortDescending();
     static bool isValidScore(double score);
 };
 
-class Student {
+class Player {
 private:
-    std::string id;
-    std::string name;
+    string riotId;
+    string agent;
     ScoreList scoreList;
 
 public:
-    Student();
-    Student(std::string studentId, std::string studentName);
-
-    std::string getId() const;
-    std::string getName() const;
+    Player();
+    Player(string playerRiotId, string mainAgent);
+    string getRiotId() const;
+    string getAgent() const;
     ScoreList& getScoreList();
     const ScoreList& getScoreList() const;
-
     double getAverage() const;
-    char getLetterGrade() const;
-
-    static bool isValidId(std::string id);
-    static char determineLetterGrade(double average);
+    string getRank() const;
+    static bool isValidRiotId(string riotId);
+    static string determineRank(double average);
 };
 
-class Task {
+class Achievement {
 private:
-    std::string description;
-    int priority;
-    bool completed;
+    string label;
+    int tier;
+    bool disputed;
 
 public:
-    Task();
-    Task(std::string taskDescription, int taskPriority);
-
-    std::string getDescription() const;
-    int getPriority() const;
-    bool isCompleted() const;
-    void markComplete();
-
-    static bool isValidPriority(int priority);
+    Achievement();
+    Achievement(string achievementLabel, int achievementTier);
+    string getLabel() const;
+    int getTier() const;
+    bool isDisputed() const;
+    void markDisputed();
+    static bool isValidTier(int tier);
 };
 
-class TaskNode {
-public:
-    Task data;
-    TaskNode* next;
+struct AchievementNode {
+    Achievement data;
+    AchievementNode* next;
 
-    TaskNode(Task task);
+    AchievementNode(Achievement achievement);
 };
 
-class TaskList {
+class AchievementList {
 private:
-    TaskNode* head;
+    AchievementNode* head;
 
 public:
-    TaskList();
-    TaskList(const TaskList& other) = delete;
-    TaskList& operator=(const TaskList& other) = delete;
-    ~TaskList();
-
-    void insertFront(Task task);
-    int countTasks() const;
-    TaskNode* findTask(std::string description);
-    const TaskNode* findTask(std::string description) const;
-    bool markTaskComplete(std::string description);
-    int removeCompletedTasks();
+    AchievementList();
+    ~AchievementList();
+    bool insertByTier(Achievement achievement);     
+    int countAchievements() const;
+    AchievementNode* findAchievement(string label);
+    const AchievementNode* findAchievement(string label) const;
+    bool removeAchievement(string label);          
+    const AchievementNode* getHead() const;     
     void clear();
     bool isEmpty() const;
 };
 
-struct InventoryItem {
-    std::string sku;
-    std::string name;
-    int quantity;
-    double price;
-};
-
-class InventoryReport {
+class RosterReport {
 public:
-    static bool isValidQuantity(int quantity);
-    static bool isValidPrice(double price);
-    static double calculateItemValue(const InventoryItem& item);
-
-    static int readInventoryFile(std::string filename, InventoryItem items[], int maxItems);
-    static bool writeInventoryReport(std::string filename, const InventoryItem items[], int count);
-
-    static double calculateTotalInventoryValue(const InventoryItem items[], int count);
-    static int findItemBySku(const InventoryItem items[], int count, std::string sku);
-    static int findHighestValueItemIndex(const InventoryItem items[], int count);
+    static bool isValidMatchCount(int matchesPlayed);
+    static bool isValidTotalScore(double totalCombatScore);
+    static double calculateAverageScore(const RosterEntry& entry);
+    static int readRosterFile(string filename, RosterEntry entries[], int maxEntries);
+    static bool writeRosterReport(string filename, const RosterEntry entries[], int count);
+    static double calculateTeamAverage(const RosterEntry entries[], int count);
+    static int findEntryByRiotId(const RosterEntry entries[], int count, string riotId);
+    static int findTopFraggerIndex(const RosterEntry entries[], int count);
 };
 
 bool isValidMenuChoice(int choice);
 void printMenu();
-void printStudent(const Student& student);
+void printPlayer(const Player& player);
+int readMenuChoice();
 
 #endif

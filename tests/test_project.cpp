@@ -79,6 +79,12 @@ void testWeek3FunctionsAndProgramDesign() {
     Player player("Ned#KR1", "Reyna");
     assert(player.getRiotId() == "Ned#KR1");
     assert(player.getAgent() == "Reyna");
+    
+    RosterEntry entry = {"Peter#EUW", "Sova", 4, 800.0};
+    assert(nearlyEqual(RosterReport::calculateAverageScore(entry), 200.0));
+
+    RosterEntry benched = {"Bench#TST", "Neon", 0, 0.0};
+    assert(nearlyEqual(RosterReport::calculateAverageScore(benched), 0.0));
 }
 
 // Week 4: Arrays, Searching, and Sorting
@@ -144,6 +150,24 @@ void testWeek6SimpleLinkedAchievementList() {
  
     assert(!achievements.isEmpty());
     assert(achievements.countAchievements() == 3);
+    
+    const AchievementNode* current = achievements.getHead();
+    assert(current->data.getTier() == 5);
+    current = current->next;
+    assert(current->data.getTier() == 4);
+    current = current->next;
+    assert(current->data.getTier() == 2);
+    assert(current->next == nullptr);
+
+    assert(achievements.findAchievement("ace on Ascent") != nullptr);
+    assert(achievements.findAchievement("missing") == nullptr);
+
+    assert(achievements.removeAchievement("ace on Ascent"));
+    assert(achievements.countAchievements() == 1);
+    assert(!achievements.removeAchievement("ace on Ascent"));
+
+    achievements.clear();
+    assert(achievements.isEmpty());
 }
 
 // Week 7: File-Based Roster Report

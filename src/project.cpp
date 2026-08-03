@@ -21,14 +21,6 @@ void printMenu() {
     cout << "Choice: ";
 }
  
-void printPlayer(const Player& player) {
-    cout << fixed << setprecision(1);
-    cout << player.getRiotId() << " "
-         << player.getAgent() << " "
-         << "Average: " << player.getAverage() << " "
-         << "Rank: " << player.getRank()
-         << endl;
-}
 
 int readMenuChoice() {
     int choice = 0;

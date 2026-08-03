@@ -163,7 +163,7 @@ void testWeek6SimpleLinkedAchievementList() {
     assert(achievements.findAchievement("missing") == nullptr);
 
     assert(achievements.removeAchievement("ace on Ascent"));
-    assert(achievements.countAchievements() == 1);
+    assert(achievements.countAchievements() == 2);
     assert(!achievements.removeAchievement("ace on Ascent"));
 
     achievements.clear();

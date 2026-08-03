@@ -31,27 +31,27 @@ make clean
 ## Course Topics Integrated and Tested
 
 1. Week 1 Program Basics
-   - Code location: `src/project.cpp` (`ScoreList::getAverage()`, `ScoreList::getTotal()`, `printPlayer()`)
+   - Code location: `include/project.hpp` (rank cutoffs and array-size constants) and `src/project.cpp` (`ScoreList::getTotal()`, `ScoreList::getAverage()`, `printMenu()`)
    - Test location: `tests/test_project.cpp` (`testWeek1ProgramBasics()`)
 
 2. Week 2 Decisions and Loops
-   - Code location: `src/main.cpp` (menu `do/while` loop) and `src/project.cpp` (`readMenuChoice()`, `isValidMenuChoice()`, `Player::determineRank()`)
+   - Code location: `src/main.cpp` (menu `do/while` loop) and `src/project.cpp` (`readMenuChoice()` loop, `isValidMenuChoice()`, `ScoreList::isValidScore()`, `Achievement::isValidTier()`, `Player::determineRank()`)
    - Test location: `tests/test_project.cpp` (`testWeek2DecisionsAndLoops()`)
 
 3. Week 3 Functions and Program Design
-   - Code location: `src/project.cpp` (`RosterReport::calculateAverageScore()`, `RosterReport::calculateTeamAverage()`, `Player::getScoreList()`)
+   - Code location: `src/project.cpp` (`RosterReport::calculateAverageScore()`, `ScoreList::getTotal()`, `Player`)
    - Test location: `tests/test_project.cpp` (`testWeek3FunctionsAndProgramDesign()`)
 
 4. Week 4 Arrays, Searching, and Sorting
-   - Code location: `src/project.cpp` (`ScoreList::findScore()`, `ScoreList::sortDescending()`, `RosterReport::findEntryByRiotId()`, `RosterReport::findTopFraggerIndex()`)
+   - Code location: `src/project.cpp` (`ScoreList::findScore()`, `ScoreList::sortDescending()`, `ScoreList::getScoreAt()`, `RosterReport::findEntryByRiotId()`, `RosterReport::findTopFraggerIndex()`)
    - Test location: `tests/test_project.cpp` (`testWeek4ArraysSearchingSorting()`)
 
 5. Week 5 Strings and Structures
-   - Code location: `src/project.cpp` (`Player::isValidRiotId()`)
+   - Code location: `include/project.hpp` (`RosterEntry`) and `src/project.cpp` (`Player::isValidRiotId()`)
    - Test location: `tests/test_project.cpp` (`testWeek5StringsAndStructures()`)
 
 6. Week 6 Pointers, Dynamic Memory, and Linked Lists
-   - Code location: `src/project.cpp` (`AchievementNode`, `AchievementList::insertByTier()`, `AchievementList::removeAchievement()`, `AchievementList::clear()`)
+   - Code location: `src/project.cpp` (`AchievementNode`, `AchievementList::insertByTier()`, `AchievementList::findAchievement()`, `AchievementList::removeAchievement()`, `AchievementList::clear()`)
    - Test location: `tests/test_project.cpp` (`testWeek6SimpleLinkedAchievementList()`)
 
 7. Week 7 File I/O and Integration

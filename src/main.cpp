@@ -5,11 +5,28 @@
 using namespace std;
 
 int main() {
-    AchievementList achievements;
+    RosterEntry entries[MAX_MATCH_ROWS];
+    MatchQueue schedule;
+    Player roster[MAX_ROSTER_ENTRIES];
     int choice = -1;
 
     cout << "Valorant Scoreboard Tracker" << endl;
-    cout << "Tracks players, combat scores, ranks, and achievements." << endl;
+    cout << "Tracks players, combat scores, ranks, and upcoming matches." << endl;
+
+    int entryCount = RosterReport::readRosterFile(
+        "data/matches.txt",
+        entries,
+        MAX_MATCH_ROWS
+    );
+    int playerCount = RosterReport::buildRoster(
+        entries,
+        entryCount,
+        roster,
+        MAX_ROSTER_ENTRIES
+    );
+
+    cout << "Loaded " << entryCount << " match row(s) into "
+         << playerCount << " player(s)." << endl;
 
     do {
         printMenu();
@@ -18,126 +35,130 @@ int main() {
       
         switch (choice) {
             case 1: {
-                RosterEntry entries[MAX_ROSTER_ENTRIES];
-                int count = RosterReport::readRosterFile(
-                    "data/roster.txt",
-                    entries,
-                    MAX_ROSTER_ENTRIES
-                );
- 
-                if (count == 0) {
-                    cout << "Could not read data/roster.txt" << endl;
-                    break;
-                }
- 
                 string riotId = "";
-                cout << "Riot ID to search for: ";
+                cout << "Riot ID to look up: ";
                 cin >> riotId;
- 
-                int index = RosterReport::findEntryByRiotId(entries, count, riotId);
- 
+
+                int index = RosterReport::findEntryByRiotId(roster, playerCount, riotId);
+
                 if (index == -1) {
-                    cout << riotId << " is not in the roster file." << endl;
+                    cout << riotId << " is not on the roster." << endl;
                     break;
                 }
- 
-                double average = RosterReport::calculateAverageScore(entries[index]);
- 
-                cout << fixed << setprecision(1);
-                cout << "Found at entry " << index + 1 << " of " << count << endl;
-                cout << "  Riot ID: " << entries[index].riotId << endl;
-                cout << "  Agent:   " << entries[index].agent << endl;
-                cout << "  Matches: " << entries[index].matchesPlayed << endl;
-                cout << "  Total:   " << entries[index].totalCombatScore << endl;
-                cout << "  Average: " << average << endl;
-                cout << "  Rank:    " << Player::determineRank(average) << endl;
- 
+
+                roster[index].sortScores();
+                printPlayer(roster[index]);
+
+                cout << "  Scores:";
+
+                for (int i = 0; i < roster[index].getScoreList().getCount(); i++) {
+                    cout << " " << roster[index].getScoreList().getScoreAt(i);
+                }
+
+                cout << endl;
+
                 break;
             }
             case 2: {
                 int action = -1;
- 
+
                 do {
-                    cout << endl << "Achievements ("
-                         << achievements.countAchievements() << " recorded)" << endl;
- 
-                    if (achievements.isEmpty()) {
+                    cout << endl << "Upcoming matches ("
+                         << schedule.countMatches() << " scheduled)" << endl;
+
+                    if (schedule.isEmpty()) {
                         cout << "  (none yet)" << endl;
                     }
- 
-                    for (const AchievementNode* node = achievements.getHead();
+
+                    for (const MatchNode* node = schedule.getHead();
                          node != nullptr; node = node->next) {
-                        cout << "  [tier " << node->data.getTier() << "] "
-                             << node->data.getLabel() << endl;
+                        cout << "  Match " << node->data.getMatchNumber()
+                             << ": vs " << node->data.getOpponent()
+                             << " on " << node->data.getMapName() << endl;
                     }
- 
-                    cout << "1. Add an achievement" << endl;
-                    cout << "2. Delete an achievement" << endl;
+
+                    cout << "1. Add a match" << endl;
+                    cout << "2. Delete a match" << endl;
                     cout << "0. Back to the main menu" << endl;
-                    action = readMenuChoice();
- 
-                    if (action == 1) {
-                        string label = "";
-                        cout << "Achievement: ";
-                        getline(cin >> ws, label);
- 
-                        int tier = 0;
-                        cout << "Tier (1-5): ";
-                        cin >> tier;
- 
-                        if (achievements.insertByTier(Achievement(label, tier))) {
-                            cout << "Added." << endl;
-                        } else {
-                            cout << "That achievement is already recorded." << endl;
+                    cout << "Choice: ";
+                    cin >> action;
+
+                    while (!cin || action < 0 || action > 2) {
+                        if (cin.eof()) {
+                            action = 0;
+                            break;
                         }
-                    } else if (action == 2) {
-                        string label = "";
-                        cout << "Achievement to delete: ";
-                        getline(cin >> ws, label);
- 
-                        if (achievements.removeAchievement(label)) {
+
+                        cout << "Invalid choice. Enter 0-2: ";
+                        cin.clear();
+                        cin.ignore(10000, '\n');
+                        cin >> action;
+                    }
+
+                    if (action == 1) {
+                        string opponent = "";
+                        string mapName = "";
+                        int number = 0;
+
+                        cout << "Opponent: ";
+                        getline(cin >> ws, opponent);
+                        cout << "Map: ";
+                        cin >> mapName;
+                        cout << "Match number (1-30): ";
+                        cin >> number;
+
+                        if (schedule.insertByNumber(UpcomingMatch(opponent, mapName, number))) {
+                            cout << "Added." << endl;
+                        } 
+                    } 
+                    else if (action == 2) {
+                        string opponent = "";
+                        cout << "Opponent to delete: ";
+                        getline(cin >> ws, opponent);
+
+                        if (schedule.removeMatch(opponent)) {
                             cout << "Deleted." << endl;
-                        } else {
-                            cout << "No achievement with that label." << endl;
+                        } 
+                        else {
+                            cout << "No match against that opponent." << endl;
                         }
                     }
-                } while (action != 0);
- 
+                } 
+                while (action != 0);
+
                 break;
             }
 
             case 3: {
-                RosterEntry entries[MAX_ROSTER_ENTRIES];
-                int count = RosterReport::readRosterFile(
-                    "data/roster.txt",
-                    entries,
-                    MAX_ROSTER_ENTRIES
-                );
+                RosterReport::sortByAverage(roster, playerCount);
 
                 cout << fixed << setprecision(1);
-                cout << "Read " << count << " roster entr(ies)." << endl;
+                cout << "Read " << playerCount << " player(s)." << endl;
+
+                for (int i = 0; i < playerCount; i++) {
+                    printPlayer(roster[i]);
+                }
+
                 cout << "Team average combat score: "
-                     << RosterReport::calculateTeamAverage(entries, count)
+                     << RosterReport::calculateTeamAverage(roster, playerCount)
                      << endl;
-                int top = RosterReport::findTopFraggerIndex(entries, count);
+
+                int top = RosterReport::findTopFraggerIndex(roster, playerCount);
 
                 if (top != -1) {
-                    cout << "Top fragger: " << entries[top].riotId << " ("
-                         << RosterReport::calculateAverageScore(entries[top])
-                         << ", "
-                         << Player::determineRank(
-                                RosterReport::calculateAverageScore(entries[top]))
-                         << ")" << endl;
+                    cout << "Top fragger: " << roster[top].getRiotId() << " ("
+                         << roster[top].getAverage() << ", "
+                         << roster[top].getRank() << ")" << endl;
                 }
 
                 if (RosterReport::writeRosterReport(
                         "roster_report.txt",
-                        entries,
-                        count
+                        roster,
+                        playerCount
                     )) {
                     cout << "Report written to roster_report.txt" << endl;
                 }
- 
+
                 break;
             }
 

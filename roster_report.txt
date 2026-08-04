@@ -1,8 +1,6 @@
 Valorant Scoreboard Report
 RiotID Agent Matches Total Average Rank
-Ned#Stark Reyna 3 994.5 331.5 Radiant
-Arya#Stark Jett 3 780.0 260.0 Immortal
-Robert#Baratheon Chamber 5 939.1 187.8 Gold
-Tyrion#Lannister Deadlock 9 293.9 32.7 Iron
-Daenerys#Targaryen Skye 1 340.2 340.2 Radiant
-Team average combat score: 230.4
+Ned#KR1 Reyna 3 994.5 331.5 Radiant
+Peter#EUW Sova 3 666.5 222.2 Diamond
+MJ#BR1 Sage 3 555.5 185.2 Gold
+Team average combat score: 246.3

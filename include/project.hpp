@@ -7,8 +7,7 @@ using namespace std;
 
 const int MAX_SCORES = 10;
 const int MAX_ROSTER_ENTRIES = 20;
-
-const double MIN_SCORE = 0.0;
+const int MAX_MATCH_ROWS = 100;
 const double MAX_SCORE = 1000.0;
 
 const double RADIANT_MINIMUM = 300.0;
@@ -16,14 +15,13 @@ const double IMMORTAL_MINIMUM = 260.0;
 const double DIAMOND_MINIMUM = 220.0;
 const double GOLD_MINIMUM = 180.0;
 
-const int MIN_TIER = 1;
-const int MAX_TIER = 5;
+const int MIN_MATCH_NUMBER = 1;
+const int MAX_MATCH_NUMBER = 30;
 
 struct RosterEntry {
     string riotId;
     string agent;
-    int matchesPlayed;
-    double totalCombatScore;
+    double combatScore;
 };
 
 class ScoreList {
@@ -54,6 +52,8 @@ public:
     Player(string playerRiotId, string mainAgent);
     string getRiotId() const;
     string getAgent() const;
+    bool addScore(double score);     
+    void sortScores();
     ScoreList& getScoreList();
     const ScoreList& getScoreList() const;
     double getAverage() const;
@@ -62,56 +62,55 @@ public:
     static string determineRank(double average);
 };
 
-class Achievement {
+class UpcomingMatch {
 private:
-    string label;
-    int tier;
-    bool disputed;
+    string opponent;
+    string mapName;
+    int matchNumber;
 
 public:
-    Achievement();
-    Achievement(string achievementLabel, int achievementTier);
-    string getLabel() const;
-    int getTier() const;
-    bool isDisputed() const;
-    void markDisputed();
-    static bool isValidTier(int tier);
+    UpcomingMatch();
+    UpcomingMatch(string opponentName, string map, int number);
+    string getOpponent() const;
+    string getMapName() const;
+    int getMatchNumber() const;
+    static bool isValidMatchNumber(int number);
 };
 
-struct AchievementNode {
-    Achievement data;
-    AchievementNode* next;
+struct MatchNode {
+    UpcomingMatch data;
+    MatchNode* next;
 
-    AchievementNode(Achievement achievement);
+    MatchNode(UpcomingMatch match);
 };
 
-class AchievementList {
+class MatchQueue {
 private:
-    AchievementNode* head;
+    MatchNode* head;
 
 public:
-    AchievementList();
-    ~AchievementList();
-    bool insertByTier(Achievement achievement);     
-    int countAchievements() const;
-    AchievementNode* findAchievement(string label);
-    const AchievementNode* findAchievement(string label) const;
-    bool removeAchievement(string label);          
-    const AchievementNode* getHead() const;     
+    MatchQueue();
+    ~MatchQueue();
+    bool insertByNumber(UpcomingMatch match);
+    bool removeMatch(string opponentName);
+    int countMatches() const;
+    MatchNode* findMatch(string opponentName);
+    const MatchNode* findMatch(string opponentName) const;
+    const MatchNode* getHead() const;
     void clear();
     bool isEmpty() const;
 };
 
 class RosterReport {
 public:
-    static bool isValidMatchCount(int matchesPlayed);
-    static bool isValidTotalScore(double totalCombatScore);
-    static double calculateAverageScore(const RosterEntry& entry);
     static int readRosterFile(string filename, RosterEntry entries[], int maxEntries);
-    static bool writeRosterReport(string filename, const RosterEntry entries[], int count);
-    static double calculateTeamAverage(const RosterEntry entries[], int count);
-    static int findEntryByRiotId(const RosterEntry entries[], int count, string riotId);
-    static int findTopFraggerIndex(const RosterEntry entries[], int count);
+    static int buildRoster(const RosterEntry entries[], int entryCount,
+                           Player players[], int maxPlayers);
+    static bool writeRosterReport(string filename, const Player players[], int count);
+    static double calculateTeamAverage(const Player players[], int count);
+    static int findEntryByRiotId(const Player players[], int count, string riotId);
+    static int findTopFraggerIndex(const Player players[], int count);
+    static void sortByAverage(Player players[], int count);
 };
 
 bool isValidMenuChoice(int choice);

@@ -2,7 +2,10 @@
 
 ## Overview
 
-This repository contains a fully working Valorant tracker that manages players, ranks, and notable achievements. This program takes a roster file as input and allows users to search for players, receive a roster report, and edit achievements.
+This repository contains a fully working Valorant tracker that manages players,
+combat scores, ranks, and the team's upcoming match schedule. The program reads a
+match file, groups the rows into `Player` objects, and lets the user look up a
+player, edit the upcoming match schedule, and write a roster report as a file.
 
 ## Compile
 
@@ -31,34 +34,33 @@ make clean
 ## Course Topics Integrated and Tested
 
 1. Week 1 Program Basics
-   - Code location: `include/project.hpp` (rank cutoffs and array-size constants) and `src/project.cpp` (`ScoreList::getTotal()`, `ScoreList::getAverage()`, `printMenu()`)
-   - Test location: `tests/test_project.cpp` (`testWeek1ProgramBasics()`)
+   - Code location: `src/project.cpp` (`ScoreList::getTotal()`, `ScoreList::getAverage()`, `printPlayer()`, `printMenu()`)
+   - Test location: `tests/test_project.cpp` (`testProgramBasicsAverageCalculation()`)
 
 2. Week 2 Decisions and Loops
-   - Code location: `src/main.cpp` (menu `do/while` loop) and `src/project.cpp` (`readMenuChoice()` loop, `isValidMenuChoice()`, `ScoreList::isValidScore()`, `Achievement::isValidTier()`, `Player::determineRank()`)
-   - Test location: `tests/test_project.cpp` (`testWeek2DecisionsAndLoops()`)
+   - Code location: `src/main.cpp` (menu `do/while`) and `src/project.cpp` (`readMenuChoice()` loop, `isValidMenuChoice()`, `ScoreList::isValidScore()`, `UpcomingMatch::isValidMatchNumber()`, `Player::determineRank()`)
+   - Test location: `tests/test_project.cpp` (`testDecisionsAndValidation()`)
 
 3. Week 3 Functions and Program Design
-   - Code location: `src/project.cpp` (`RosterReport::calculateAverageScore()`, `ScoreList::getTotal()`, `Player`)
-   - Test location: `tests/test_project.cpp` (`testWeek3FunctionsAndProgramDesign()`)
+   - Code location: `src/project.cpp` (`Player::addScore()`, `Player::sortScores()`, `Player::getAverage()`, `Player::getRank()`, `Player::getScoreList()`)
+   - Test location: `tests/test_project.cpp` (`testPlayerInstanceMethodsReturnValues()`)
 
 4. Week 4 Arrays, Searching, and Sorting
-   - Code location: `src/project.cpp` (`ScoreList::findScore()`, `ScoreList::sortDescending()`, `ScoreList::getScoreAt()`, `RosterReport::findEntryByRiotId()`, `RosterReport::findTopFraggerIndex()`)
-   - Test location: `tests/test_project.cpp` (`testWeek4ArraysSearchingSorting()`)
+   - Code location: `src/project.cpp` (`ScoreList::findScore()`, `ScoreList::sortDescending()`, `ScoreList::getScoreAt()`, `RosterReport::findEntryByRiotId()`, `RosterReport::findTopFraggerIndex()`, `RosterReport::sortByAverage()`)
+   - Test location: `tests/test_project.cpp` (`testArraySearchAndSort()`)
 
 5. Week 5 Strings and Structures
    - Code location: `include/project.hpp` (`RosterEntry`) and `src/project.cpp` (`Player::isValidRiotId()`)
-   - Test location: `tests/test_project.cpp` (`testWeek5StringsAndStructures()`)
+   - Test location: `tests/test_project.cpp` (`testStringsAndStructuresRosterEntry()`)
 
 6. Week 6 Pointers, Dynamic Memory, and Linked Lists
-   - Code location: `src/project.cpp` (`AchievementNode`, `AchievementList::insertByTier()`, `AchievementList::findAchievement()`, `AchievementList::removeAchievement()`, `AchievementList::clear()`)
-   - Test location: `tests/test_project.cpp` (`testWeek6SimpleLinkedAchievementList()`)
+   - Code location: `src/project.cpp` (`MatchNode`, `MatchQueue::insertByNumber()`, `MatchQueue::findMatch()`, `MatchQueue::removeMatch()`, `MatchQueue::clear()`)
+   - Test location: `tests/test_project.cpp` (`testLinkedMatchQueueInsertSearchAndCleanup()`)
 
 7. Week 7 File I/O and Integration
-   - Code location: `src/project.cpp` (`RosterReport::readRosterFile()`, `RosterReport::writeRosterReport()`)
-   - Test location: `tests/test_project.cpp` (`testWeek7FileBasedRosterReport()`)
-   - Files: `data/roster.txt`
-
+   - Code location: `src/project.cpp` (`RosterReport::readRosterFile()`, `RosterReport::buildRoster()`, `RosterReport::writeRosterReport()`)
+   - Test location: `tests/test_project.cpp` (`testFileBasedRosterLoadAndAverage()`)
+   - Files: `data/matches.txt`
 
 ## Final Submission Checklist
 

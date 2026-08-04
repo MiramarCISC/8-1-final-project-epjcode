@@ -1,9 +1,8 @@
-#include "project.hpp"
 #include <cassert>
 #include <cmath>
 #include <fstream>
 #include <iostream>
-#include <string>
+#include "project.hpp"
 
 using namespace std;
 
@@ -11,169 +10,168 @@ bool nearlyEqual(double actual, double expected, double tolerance = 0.0001) {
     return fabs(actual - expected) <= tolerance;
 }
 
-void createTestInventoryFile(string filename) {
-    ofstream out(filename);
-
-    out << "A100 Apples 10 1.50" << endl;
-    out << "B200 Bread 5 3.25" << endl;
-    out << "C300 Cereal 8 4.75" << endl;
-
-    out.close();
-}
-
-// Week 1: Program Basics
-void testWeek1ProgramBasics() {
+void testProgramBasicsAverageCalculation() {
     ScoreList scores;
-    scores.addScore(80.0);
-    scores.addScore(90.0);
+    scores.addScore(280.0);
+    scores.addScore(300.0);
 
-    double average = scores.getAverage();
-
-    assert(nearlyEqual(average, 85.0));
-    assert(Student::determineLetterGrade(95.0) == 'A');
-    assert(Student::determineLetterGrade(65.0) == 'D');
+    assert(scores.getCount() == 2);
+    assert(nearlyEqual(scores.getTotal(), 580.0));
+    assert(nearlyEqual(scores.getAverage(), 290.0));
 }
 
-// Week 2: Decisions and Loops
-void testWeek2DecisionsAndLoops() {
-    assert(ScoreList::isValidScore(0.0));
-    assert(ScoreList::isValidScore(100.0));
-    assert(!ScoreList::isValidScore(-1.0));
-    assert(!ScoreList::isValidScore(101.0));
+void testDecisionsAndValidation() {
+    assert(ScoreList::isValidScore(95.0) == true);
+    assert(ScoreList::isValidScore(-1.0) == false);
+    assert(ScoreList::isValidScore(MAX_SCORE + 1.0) == false);
 
-    assert(Task::isValidPriority(1));
-    assert(Task::isValidPriority(5));
-    assert(!Task::isValidPriority(0));
-    assert(!Task::isValidPriority(6));
+    assert(isValidMenuChoice(0) == true);
+    assert(isValidMenuChoice(5) == false);
 
-    assert(isValidMenuChoice(0));
-    assert(isValidMenuChoice(4));
-    assert(!isValidMenuChoice(5));
+    assert(Player::determineRank(RADIANT_MINIMUM) == "Radiant");
+    assert(Player::determineRank(0.0) == "Iron");
+
+    Player full("Fill#TST", "Neon");
+    for (int i = 0; i < MAX_SCORES; i++) {
+        assert(full.addScore(200.0) == true);
+    }
+    assert(full.addScore(200.0) == false);
 }
 
-// Week 3: Functions and Program Design
-void testWeek3FunctionsAndProgramDesign() {
+void testPlayerInstanceMethodsReturnValues() {
+    Player player("Ned#KR1", "Reyna");
+    player.addScore(320.0);
+    player.addScore(300.0);
+
+    assert(player.getRiotId() == "Ned#KR1");
+    assert(player.getAgent() == "Reyna");
+    assert(nearlyEqual(player.getAverage(), 310.0));
+    assert(player.getRank() == "Radiant");
+
+    assert(player.addScore(-5.0) == false);
+    player.sortScores();
+    assert(nearlyEqual(player.getScoreList().getScoreAt(0), 320.0));
+}
+
+void testArraySearchAndSort() {
     ScoreList scores;
-    scores.addScore(70.0);
-    scores.addScore(80.0);
-    scores.addScore(90.0);
-
-    assert(nearlyEqual(scores.getTotal(), 240.0));
-    assert(nearlyEqual(scores.getAverage(), 80.0));
-
-    Student student("A123", "Alex");
-    assert(student.getId() == "A123");
-    assert(student.getName() == "Alex");
-}
-
-// Week 4: Arrays, Searching, and Sorting
-void testWeek4ArraysSearchingSorting() {
-    ScoreList scores;
-    scores.addScore(88.0);
     scores.addScore(72.5);
-    scores.addScore(100.0);
-    scores.addScore(91.0);
+    scores.addScore(288.0);
+    scores.addScore(310.0);
 
-    assert(scores.findScore(100.0) == 2);
+    assert(scores.findScore(310.0) == 2);
     assert(scores.findScore(50.0) == -1);
 
-    scores.sortAscending();
+    scores.sortDescending();
 
-    assert(nearlyEqual(scores.getScoreAt(0), 72.5));
-    assert(nearlyEqual(scores.getScoreAt(1), 88.0));
-    assert(nearlyEqual(scores.getScoreAt(2), 91.0));
-    assert(nearlyEqual(scores.getScoreAt(3), 100.0));
+    assert(nearlyEqual(scores.getScoreAt(0), 310.0));
+    assert(nearlyEqual(scores.getScoreAt(2), 72.5));
+    assert(nearlyEqual(scores.getTotal(), 670.5));
 }
 
-// Week 5: Strings and Structures
-void testWeek5StringsAndStructures() {
-    Student student("A123", "Alex");
+void testStringsAndStructuresRosterEntry() {
+    RosterEntry entry;
+    entry.riotId = "Ned#KR1";
+    entry.agent = "Reyna";
+    entry.combatScore = 298.5;
 
-    assert(Student::isValidId("A123"));
-    assert(!Student::isValidId("a123"));
-    assert(student.getId() == "A123");
-    assert(student.getName() == "Alex");
+    assert(entry.riotId == "Ned#KR1");
+    assert(entry.agent == "Reyna");
+    assert(nearlyEqual(entry.combatScore, 298.5));
 
-    InventoryItem item = {"B200", "Bread", 5, 3.25};
-    assert(item.sku == "B200");
-    assert(item.name == "Bread");
-    assert(item.quantity == 5);
+    assert(Player::isValidRiotId(entry.riotId) == true);
+    assert(Player::isValidRiotId("Ned") == false);
+    assert(Player::isValidRiotId("Ned#") == false);
+    assert(Player::isValidRiotId("two words#KR1") == false);
 }
 
-// Week 6: Simple Linked Task List
-void testWeek6SimpleLinkedTaskList() {
-    TaskList tasks;
+void testLinkedMatchQueueInsertSearchAndCleanup() {
+    MatchQueue schedule;
 
-    tasks.insertFront(Task("homework", 3));
-    tasks.insertFront(Task("study", 5));
-    tasks.insertFront(Task("project", 4));
+    schedule.insertByNumber(UpcomingMatch("Sentinels", "Ascent", 5));
+    schedule.insertByNumber(UpcomingMatch("LOUD", "Bind", 2));
 
-    assert(tasks.countTasks() == 3);
-    assert(tasks.findTask("study") != nullptr);
-    assert(tasks.findTask("missing") == nullptr);
+    assert(schedule.countMatches() == 2);
+    assert(schedule.getHead()->data.getOpponent() == "LOUD");
+    assert(schedule.findMatch("Sentinels") != nullptr);
+    assert(schedule.findMatch("missing") == nullptr);
 
-    assert(tasks.markTaskComplete("homework"));
-    assert(tasks.markTaskComplete("project"));
+    const MatchNode* firstMatch = schedule.getHead();
+    const MatchNode* secondMatch = firstMatch->next;
 
-    int removed = tasks.removeCompletedTasks();
+    assert(firstMatch->data.getMatchNumber() == 2);
+    assert(secondMatch->data.getMatchNumber() == 5);
+    assert(secondMatch->next == nullptr);
 
-    assert(removed == 2);
-    assert(tasks.countTasks() == 1);
-    assert(tasks.findTask("study") != nullptr);
-    assert(tasks.findTask("homework") == nullptr);
+    assert(schedule.insertByNumber(UpcomingMatch("", "Split", 4)) == false);
 
-    tasks.clear();
-    assert(tasks.isEmpty());
+    assert(schedule.removeMatch("LOUD") == true);
+    assert(schedule.countMatches() == 1);
+
+    schedule.clear();
+    assert(schedule.isEmpty() == true);
 }
 
-// Week 7: File-Based Inventory Report
-void testWeek7FileBasedInventoryReport() {
-    string inputFilename = "tests/resources/test_inventory_input.txt";
-    string outputFilename = "tests/resources/test_inventory_report_output.txt";
+void testFileBasedRosterLoadAndAverage() {
+    ofstream output("tests/resources/sample_matches.txt");
+    output << "Ned#KR1 Reyna 300.0" << endl;
+    output << "Peter#EUW Sova 200.0" << endl;
+    output << "bad Reyna 250.0" << endl;
+    output << "Ned#KR1 Reyna 360.0" << endl;
+    output.close();
 
-    createTestInventoryFile(inputFilename);
+    RosterEntry entries[10];
+    int entryCount = RosterReport::readRosterFile(
+        "tests/resources/sample_matches.txt", entries, 10);
 
-    InventoryItem items[10];
-    int count = InventoryReport::readInventoryFile(inputFilename, items, 10);
+    assert(entryCount == 3);
+    assert(entries[0].riotId == "Ned#KR1");
+    assert(entries[1].agent == "Sova");
+    assert(RosterReport::readRosterFile("tests/resources/missing.txt", entries, 10) == 0);
 
-    assert(count == 3);
-    assert(items[0].sku == "A100");
-    assert(items[2].name == "Cereal");
+    Player roster[MAX_ROSTER_ENTRIES];
+    int playerCount = RosterReport::buildRoster(entries, entryCount, roster,
+                                                MAX_ROSTER_ENTRIES);
 
-    assert(nearlyEqual(InventoryReport::calculateItemValue(items[0]), 15.0));
-    assert(nearlyEqual(InventoryReport::calculateTotalInventoryValue(items, count), 69.25));
+    assert(playerCount == 2);
+    assert(nearlyEqual(roster[0].getAverage(), 330.0));
+    assert(nearlyEqual(RosterReport::calculateTeamAverage(roster, playerCount), 265.0));
 
-    assert(InventoryReport::findItemBySku(items, count, "B200") == 1);
-    assert(InventoryReport::findItemBySku(items, count, "Z999") == -1);
-    assert(InventoryReport::findHighestValueItemIndex(items, count) == 2);
+    assert(RosterReport::findEntryByRiotId(roster, playerCount, "Peter#EUW") == 1);
+    assert(RosterReport::findEntryByRiotId(roster, playerCount, "missing#NA1") == -1);
+    assert(RosterReport::findTopFraggerIndex(roster, playerCount) == 0);
 
-    bool wroteReport = InventoryReport::writeInventoryReport(outputFilename, items, count);
-    assert(wroteReport);
+    RosterReport::sortByAverage(roster, playerCount);
+    assert(roster[0].getRiotId() == "Ned#KR1");
 
-    ifstream in(outputFilename);
-    assert(in.is_open());
+    assert(RosterReport::writeRosterReport(
+               "tests/resources/sample_report.txt", roster, playerCount) == true);
+
+    ifstream input("tests/resources/sample_report.txt");
+    assert(input.is_open());
 
     string contents;
     string line;
 
-    while (getline(in, line)) {
+    while (getline(input, line)) {
         contents += line + "\n";
     }
+    input.close();
 
-    assert(contents.find("Inventory Report") != string::npos);
-    assert(contents.find("A100") != string::npos);
-    assert(contents.find("Total inventory value") != string::npos);
+    assert(contents.find("Valorant Scoreboard Report") != string::npos);
+    assert(contents.find("Ned#KR1") != string::npos);
+    assert(contents.find("Team average combat score") != string::npos);
 }
 
 int main() {
-    testWeek1ProgramBasics();
-    testWeek2DecisionsAndLoops();
-    testWeek3FunctionsAndProgramDesign();
-    testWeek4ArraysSearchingSorting();
-    testWeek5StringsAndStructures();
-    testWeek6SimpleLinkedTaskList();
-    testWeek7FileBasedInventoryReport();
+    testProgramBasicsAverageCalculation();
+    testDecisionsAndValidation();
+    testPlayerInstanceMethodsReturnValues();
+    testArraySearchAndSort();
+    testStringsAndStructuresRosterEntry();
+    testLinkedMatchQueueInsertSearchAndCleanup();
+    testFileBasedRosterLoadAndAverage();
 
-    cout << "All corrected final project template tests passed!" << endl;
+    cout << "All final project tests passed!" << endl;
     return 0;
 }

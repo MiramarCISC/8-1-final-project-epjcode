@@ -1,83 +1,175 @@
 #include "project.hpp"
 #include <iostream>
+#include <iomanip>
 
 using namespace std;
 
 int main() {
+    RosterEntry entries[MAX_MATCH_ROWS];
+    MatchQueue schedule;
+    Player roster[MAX_ROSTER_ENTRIES];
     int choice = -1;
 
-    cout << "CISC 192 Final Project Sample" << endl;
-    cout << "Sample code is provided only as an example." << endl;
-    cout << "Delete or replace the sample code before final submission." << endl;
+    cout << "Valorant Scoreboard Tracker" << endl;
+    cout << "Tracks players, combat scores, ranks, and upcoming matches." << endl;
+
+    int entryCount = RosterReport::readRosterFile(
+        "data/matches.txt",
+        entries,
+        MAX_MATCH_ROWS
+    );
+    int playerCount = RosterReport::buildRoster(
+        entries,
+        entryCount,
+        roster,
+        MAX_ROSTER_ENTRIES
+    );
+
+    cout << "Loaded " << entryCount << " match row(s) into "
+         << playerCount << " player(s)." << endl;
 
     do {
         printMenu();
-        cin >> choice;
+        choice = readMenuChoice();
 
-        while (!isValidMenuChoice(choice)) {
-            cout << "Invalid choice. Enter 0-4: ";
-            cin >> choice;
-        }
-
+      
         switch (choice) {
             case 1: {
-                Student student("A123", "Alex");
-                student.getScoreList().addScore(90.0);
-                student.getScoreList().addScore(80.0);
-                student.getScoreList().addScore(100.0);
-                student.getScoreList().sortAscending();
+                string riotId = "";
+                cout << "Riot ID to look up: ";
+                cin >> riotId;
 
-                printStudent(student);
-                cout << "Score 100 found at index "
-                     << student.getScoreList().findScore(100.0)
-                     << endl;
+                int index = RosterReport::findEntryByRiotId(roster, playerCount, riotId);
+
+                if (index == -1) {
+                    cout << riotId << " is not on the roster." << endl;
+                    break;
+                }
+
+                roster[index].sortScores();
+                printPlayer(roster[index]);
+
+                cout << "  Scores:";
+
+                for (int i = 0; i < roster[index].getScoreList().getCount(); i++) {
+                    cout << " " << roster[index].getScoreList().getScoreAt(i);
+                }
+
+                cout << endl;
 
                 break;
             }
-
             case 2: {
-                TaskList tasks;
-                tasks.insertFront(Task("study", 5));
-                tasks.insertFront(Task("project", 4));
-                tasks.markTaskComplete("study");
+                int action = -1;
 
-                cout << "Task count: " << tasks.countTasks() << endl;
-                cout << "Removed completed tasks: "
-                     << tasks.removeCompletedTasks()
-                     << endl;
-                cout << "Remaining task count: " << tasks.countTasks() << endl;
+                do {
+                    cout << endl << "Upcoming matches ("
+                         << schedule.countMatches() << " scheduled)" << endl;
+
+                    if (schedule.isEmpty()) {
+                        cout << "  (none yet)" << endl;
+                    }
+
+                    for (const MatchNode* node = schedule.getHead();
+                         node != nullptr; node = node->next) {
+                        cout << "  Match " << node->data.getMatchNumber()
+                             << ": vs " << node->data.getOpponent()
+                             << " on " << node->data.getMapName() << endl;
+                    }
+
+                    cout << "1. Add a match" << endl;
+                    cout << "2. Delete a match" << endl;
+                    cout << "0. Back to the main menu" << endl;
+                    cout << "Choice: ";
+                    cin >> action;
+
+                    while (!cin || action < 0 || action > 2) {
+                        if (cin.eof()) {
+                            action = 0;
+                            break;
+                        }
+
+                        cout << "Invalid choice. Enter 0-2: ";
+                        cin.clear();
+                        cin.ignore(10000, '\n');
+                        cin >> action;
+                    }
+
+                    if (action == 1) {
+                        string opponent = "";
+                        string mapName = "";
+                        int number = 0;
+
+                        cout << "Opponent: ";
+                        getline(cin >> ws, opponent);
+                        cout << "Map: ";
+                        cin >> mapName;
+                        cout << "Match number (1-30): ";
+                        cin >> number;
+
+                        if (schedule.insertByNumber(UpcomingMatch(opponent, mapName, number))) {
+                            cout << "Added." << endl;
+                        } 
+                    } 
+                    else if (action == 2) {
+                        string opponent = "";
+                        cout << "Opponent to delete: ";
+                        getline(cin >> ws, opponent);
+
+                        if (schedule.removeMatch(opponent)) {
+                            cout << "Deleted." << endl;
+                        } 
+                        else {
+                            cout << "No match against that opponent." << endl;
+                        }
+                    }
+                } 
+                while (action != 0);
 
                 break;
             }
 
             case 3: {
-                InventoryItem items[MAX_INVENTORY_ITEMS];
-                int count = InventoryReport::readInventoryFile(
-                    "data/inventory.txt",
-                    items,
-                    MAX_INVENTORY_ITEMS
-                );
+                RosterReport::sortByAverage(roster, playerCount);
 
-                cout << "Read " << count << " inventory item(s)." << endl;
-                cout << "Total inventory value: "
-                     << InventoryReport::calculateTotalInventoryValue(items, count)
+                cout << fixed << setprecision(1);
+                cout << "Read " << playerCount << " player(s)." << endl;
+
+                for (int i = 0; i < playerCount; i++) {
+                    printPlayer(roster[i]);
+                }
+
+                cout << "Team average combat score: "
+                     << RosterReport::calculateTeamAverage(roster, playerCount)
                      << endl;
 
-                if (InventoryReport::writeInventoryReport(
-                        "inventory_report.txt",
-                        items,
-                        count
+                int top = RosterReport::findTopFraggerIndex(roster, playerCount);
+
+                if (top != -1) {
+                    cout << "Top fragger: " << roster[top].getRiotId() << " ("
+                         << roster[top].getAverage() << ", "
+                         << roster[top].getRank() << ")" << endl;
+                }
+
+                if (RosterReport::writeRosterReport(
+                        "roster_report.txt",
+                        roster,
+                        playerCount
                     )) {
-                    cout << "Report written to inventory_report.txt" << endl;
+                    cout << "Report written to roster_report.txt" << endl;
                 }
 
                 break;
             }
 
             case 4:
-                cout << "Use this sample only as an example. "
-                     << "Delete or replace sample code before submission."
-                     << endl;
+                cout << fixed << setprecision(0);
+                cout << "Rank is set by average combat score:" << endl;
+                cout << "  Radiant  " << RADIANT_MINIMUM << " and above" << endl;
+                cout << "  Immortal " << IMMORTAL_MINIMUM << " to " << RADIANT_MINIMUM - 1 << endl;
+                cout << "  Diamond  " << DIAMOND_MINIMUM << " to " << IMMORTAL_MINIMUM - 1 << endl;
+                cout << "  Gold     " << GOLD_MINIMUM << " to " << DIAMOND_MINIMUM - 1 << endl;
+                cout << "  Iron     below " << GOLD_MINIMUM << endl;
                 break;
 
             case 0:
